@@ -1,10 +1,23 @@
-import logo from './logo.svg';
-import tum_logo from './lab_logo.svg';
-import './App.css';
-import { Grid, Avatar, Box, Paper } from '@mui/material';
-import Timer from './components/Timer';
+import { useSelector, useDispatch } from "react-redux"
+import tum_logo from './lab_logo.svg'
+import './App.css'
+import { Grid, Avatar, Box, Paper, Switch } from '@mui/material'
+import Timer from './features/timer/Timer'
+import TimerTheme from './features/timer/TimerTheme'
+import { ThemeProvider } from '@mui/material/styles'
+import {
+  timerToggle,
+  selectTimerById
+} from './features/timer/timerSlice'
 
 function App() {
+  const timer = useSelector((state) => selectTimerById(state, 0))
+  const dispatch = useDispatch();
+
+  const handlePlayPause = () => {
+    dispatch(timerToggle());
+  };
+
   return (
     <div className="App">
       <Box sx={{
@@ -17,10 +30,12 @@ function App() {
             <Avatar alt="TUM logo" src={tum_logo} variant="square" sx={{ width: 200, height: 56 }}></Avatar>
           </Grid>
           <Grid item xs={2}>
-            <Timer startTime={1000} />
+            <ThemeProvider theme={TimerTheme}>
+              <Timer />
+            </ThemeProvider>
           </Grid>
           <Grid item xs={10}>
-            <Paper />
+            <Switch checked={timer.running} onChange={handlePlayPause}></Switch>
           </Grid>
           <Grid item xs={2}>
             <Paper />
