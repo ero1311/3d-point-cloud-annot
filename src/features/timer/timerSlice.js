@@ -1,42 +1,34 @@
 import {
     createSlice,
-    createEntityAdapter,
 } from '@reduxjs/toolkit'
 
-const timerAdapter = createEntityAdapter()
+// const timerAdapter = createEntityAdapter()
 
-const initialState = timerAdapter.getInitialState()
+// const initialState = timerAdapter.getInitialState()
 
+const initialState = {
+    time: 0,
+    running: false
+}
 const timerSlice = createSlice({
     name: 'timer',
     initialState,
     reducers: {
-        timerToggle(state, action) {
-            const timer = state.entities[0]
-            timer.running = !timer.running
-        },
-        timerInit(state, action) {
-            timerAdapter.addOne({
-                running: true,
-                time: 0
-            })
-        },
-        timerSaveTime(state, action) {
-            const time = action.payload
-            const timer = state.entities[0]
-            timer.time = time
-        }
+        toggleTimer: (state, action) => { state.running = !state.running },
+        setTime: (state, action) => { state.time = action.payload }
     }
 })
 export const {
-    timerToggle,
-    timerInit,
-    timerSaveTime
+    toggleTimer,
+    setTime,
 } = timerSlice.actions
 
 export default timerSlice.reducer
 
-export const {
-    selectAll: selectTimers,
-    selectById: selectTimerById
-} = timerAdapter.getSelectors((state) => state.timer)
+export const timeSelector = (state) => state.timer.time;
+export const timerRunningSelector = (state) => state.timer.running;
+
+// export const {
+//     selectAll: selectTimers,
+//     selectById: selectTimerById
+// } = timerAdapter.getSelectors((state) => state.timer)

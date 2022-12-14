@@ -4,9 +4,9 @@ import { Provider } from 'react-redux';
 import './index.css';
 import App from './App';
 import store from './store';
-import { timerInit } from './features/timer/timerSlice'
+// import { timerInit } from './features/timer/timerSlice'
 
-store.dispatch(timerInit())
+// store.dispatch(timerInit())
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

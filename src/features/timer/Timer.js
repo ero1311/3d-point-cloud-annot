@@ -6,12 +6,8 @@ import {
     Grid,
 } from "@mui/material"
 import { useClasses } from "./TimerTheme"
-import {
-    timerInit,
-    timerToggle,
-    timerSaveTime,
-    selectTimerById
-} from './timerSlice'
+import { setTime, timerRunningSelector, timeSelector } from "./timerSlice"
+
 
 const styles = theme => ({
     root: {
@@ -60,14 +56,16 @@ const styles = theme => ({
 })
 
 const Timer = () => {
-    const timer = useSelector((state) => selectTimerById(state, 0))
+    // const timer = useSelector((state) => selectTimerById(state, 0))
+    const timer = useSelector((state) => timeSelector(state))
+    const running = useSelector((state) => timerRunningSelector(state))
     const intervalRef = useRef(0);
     const dispatch = useDispatch();
 
     const formatTime = () => {
-        const sec = `${Math.floor(timer.time) % 60}`.padStart(2, "0");
-        const min = `${Math.floor(timer.time / 60) % 60}`.padStart(2, "0");
-        const hour = `${Math.floor(timer.time / 3600)}`.padStart(2, "0");
+        const sec = `${Math.floor(timer) % 60}`.padStart(2, "0");
+        const min = `${Math.floor(timer / 60) % 60}`.padStart(2, "0");
+        const hour = `${Math.floor(timer / 3600)}`.padStart(2, "0");
         return (
             <>
                 <Typography variant="h4">{[hour, min, sec].join(":")}</Typography>
@@ -83,11 +81,23 @@ const Timer = () => {
     };
 
     useEffect(() => {
-        if (timer.running) {
-            intervalRef.current = setTimeout(() => dispatch(timerSaveTime(timer.time + 0.1)), 100)
-            return () => clearTimeout(intervalRef.current);
+        if (running) {
+            const id = setInterval(() => dispatch(setTime(timer + 1)), 1000);
+            console.log("time", timer);
+            return () => {
+                clearInterval(id);
+            };
         }
-    }, [timer.time, timer.running]);
+
+    }, [timer, dispatch, running]);
+
+
+    // useEffect(() => {
+    //     if (timer.running) {
+    //         intervalRef.current = setTimeout(() => dispatch(timerSaveTime(timer.time + 0.1)), 100)
+    //         return () => clearTimeout(intervalRef.current);
+    //     }
+    // }, [timer.time, timer.running]);
 
     const classes = useClasses(styles);
     return (
@@ -95,7 +105,7 @@ const Timer = () => {
             <Grid m={2} className={classes.root}>
                 <Grid item></Grid>
                 <Grid item></Grid>
-                <Grid item>{formatTime()}</Grid>
+                <Grid item>{timer ? formatTime() : "toggle timer to start"}</Grid>
             </Grid>
         </>
     );

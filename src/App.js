@@ -6,17 +6,21 @@ import Timer from './features/timer/Timer'
 import TimerTheme from './features/timer/TimerTheme'
 import { ThemeProvider } from '@mui/material/styles'
 import {
-  timerToggle,
-  selectTimerById
+  timerRunningSelector,
+  timeSelector,
+  toggleTimer,
+
 } from './features/timer/timerSlice'
+import { useCallback } from "react"
 
 function App() {
-  const timer = useSelector((state) => selectTimerById(state, 0))
+  const timer = useSelector((state) => timeSelector(state))
+  const running = useSelector((state) => timerRunningSelector(state))
   const dispatch = useDispatch();
 
-  const handlePlayPause = () => {
-    dispatch(timerToggle());
-  };
+  const handlePlayPause = useCallback(() => {
+    dispatch(toggleTimer());
+  }, [dispatch]);
 
   return (
     <div className="App">
@@ -35,7 +39,7 @@ function App() {
             </ThemeProvider>
           </Grid>
           <Grid item xs={10}>
-            <Switch checked={timer.running} onChange={handlePlayPause}></Switch>
+            <Switch checked={running} onChange={handlePlayPause}></Switch>
           </Grid>
           <Grid item xs={2}>
             <Paper />
