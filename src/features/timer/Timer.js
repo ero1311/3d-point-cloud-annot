@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useEffect } from "react"
 import { useSelector, useDispatch } from 'react-redux'
 import {
     Box,
@@ -59,7 +59,6 @@ const Timer = () => {
     // const timer = useSelector((state) => selectTimerById(state, 0))
     const timer = useSelector((state) => timeSelector(state))
     const running = useSelector((state) => timerRunningSelector(state))
-    const intervalRef = useRef(0);
     const dispatch = useDispatch();
 
     const formatTime = () => {
@@ -68,10 +67,10 @@ const Timer = () => {
         const hour = `${Math.floor(timer / 3600)}`.padStart(2, "0");
         return (
             <>
-                <Typography variant="h4">{[hour, min, sec].join(":")}</Typography>
+                <Typography variant="h4" color="text.primary">{[hour, min, sec].join(":")}</Typography>
                 <Box className={classes.labelTime}>
                     {["hr", "min", "sec"].map((unit) => (
-                        <Typography key={unit} vairant="overline">
+                        <Typography key={unit} vairant="overline" color="text.primary">
                             {unit}
                         </Typography>
                     ))}
