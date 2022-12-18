@@ -1,11 +1,10 @@
 import { config } from '../../config';
 import { TextField, MenuItem, Typography } from '@mui/material';
-import { useSelector, useDispatch } from 'react-redux';
-import { sceneSelector, setScene } from './sceneSelectorSlice';
+import { useDispatch } from 'react-redux';
+import { setScene } from './sceneSelectorSlice';
 import { fetchPoints } from '../scannetScene/scannetSceneSlice';
 
 const SceneSelector = () => {
-    const selectedScene = useSelector((state) => sceneSelector(state))
     const dispatch = useDispatch()
 
     const handleSceneSelect = (event) => {

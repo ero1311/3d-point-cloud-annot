@@ -31,7 +31,7 @@ const scannetSceneSlice = createSlice({
             .addCase(fetchPoints.fulfilled, (state, action) => {
                 state.coords = action.payload.data.coords
                 state.colors = action.payload.data.colors
-                state.status = "idle"
+                state.status = "loaded"
             })
     }
 })

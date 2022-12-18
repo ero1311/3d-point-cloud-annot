@@ -1,46 +1,23 @@
-import React, { useRef, useMemo } from 'react'
-import ReactDOM from 'react-dom'
-import { extend, useThree, useRender } from 'react-three-fiber'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import './styles.css'
+import { useSelector } from "react-redux"
+import { coordsSelector } from './scannetSceneSlice'
+import { BufferAttribute } from "three"
 
 const ScannetScene = () => {
-    const widthDensity = data.widthDensity
-    const depthDensity = data.depthDensity
-    const geometrySize = data.geometrySize
-    const dotColor = data.dotColor
-    const dotSize = data.dotSize
-    const heightMultiplier = data.heightMultiplier
-    const mountainVariation = data.mountainVariation
-
-    const vertices = useMemo(() => {
-        return getNewVertices({ geometrySize, widthDensity, depthDensity, heightMultiplier, mountainVariation })
-    }, [geometrySize, widthDensity, depthDensity, heightMultiplier, mountainVariation])
+    const vertices = useSelector((state) => coordsSelector(state))
 
     return (
-        <points
-        // geometry={geometry}
-        >
-            <bufferGeometry attach="geometry">
-                <a.bufferAttribute
-                    attachObject={['attributes', 'position']}
-                    count={vertices.length / 3}
-                    // this renders the dots fine
-                    array={new Float32Array(vertices)}
-                    // but I can't get the interpolated values to work
-                    // might be because bufferAttribute must accept a typed array?
-                    // array={new Float32Array(factor)}
-                    itemSize={3}
-                    onUpdate={(self) => {
-                        self.needsUpdate = true
-                        self.verticesNeedUpdate = true
-                    }}
-                />
+        <points>
+            <bufferGeometry>
+                <bufferAttribute attach={"attributes-position"} {...new BufferAttribute(new Float32Array(vertices), 3)} />
             </bufferGeometry>
-
-            <pointsMaterial sizeAttenuation attach="material" color="#00ff00" depthWrite={false} size={3} />
+            <pointsMaterial
+                size={0.01}
+                threshold={0.1}
+                color={0xff00ff}
+                sizeAttenuation={true}
+            />
         </points>
     )
 }
 
-ReactDOM.render(<App />, document.getElementById('root'))
+export default ScannetScene;
