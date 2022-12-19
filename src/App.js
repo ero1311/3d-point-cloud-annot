@@ -6,6 +6,7 @@ import Timer from './features/timer/Timer'
 import AnnotBarSelector from "./features/annotBar/AnnotBarSelector"
 import SceneSelector from "./features/sceneSelector/SceneSelector"
 import ScannetScene from "./features/scannetScene/ScannetScene"
+import SpherePointer from "./features/spherePointer/SpherePointer"
 import TimerTheme from './features/timer/TimerTheme'
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
@@ -58,11 +59,13 @@ function App() {
                 position: [2, 2, 2],
                 up: [0, 0, 1]
               }}
-                dpr={window.devicePixelRatio}>
+                dpr={window.devicePixelRatio}
+                gl={{ antialias: false }}>
                 <color attach="background" args={['#202020']} />
                 <ambientLight color="#888888" />
                 <pointLight color="#888888" position={[0, 0, 3]} castShadow={true} />
                 <ScannetScene />
+                <SpherePointer />
                 <OrbitControls
                   enableDamping={false}
                   dampingFactor={0.05}

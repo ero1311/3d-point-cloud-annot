@@ -8,7 +8,8 @@ import { config } from '../../config'
 const initialState = {
     status: "idle",
     coords: null,
-    colors: null
+    colors: null,
+    count: null
 }
 
 export const fetchPoints = createAsyncThunk('scannetScene/fetchPoints', async (filename) => {
@@ -21,7 +22,8 @@ const scannetSceneSlice = createSlice({
     initialState,
     reducers: {
         setCoords: (state, action) => { state.coords = action.payload },
-        setColors: (state, action) => { state.colors = action.payload }
+        setColors: (state, action) => { state.colors = action.payload },
+        setCount: (state, action) => { state.count = action.payload },
     },
     extraReducers: (builder) => {
         builder
@@ -31,6 +33,7 @@ const scannetSceneSlice = createSlice({
             .addCase(fetchPoints.fulfilled, (state, action) => {
                 state.coords = action.payload.data.coords
                 state.colors = action.payload.data.colors
+                state.count = action.payload.data.count
                 state.status = "loaded"
             })
     }
@@ -45,3 +48,4 @@ export default scannetSceneSlice.reducer
 export const coordsSelector = (state) => state.scannetScene.coords;
 export const colorsSelector = (state) => state.scannetScene.colors;
 export const statusSelector = (state) => state.scannetScene.status;
+export const countSelector = (state) => state.scannetScene.count;
