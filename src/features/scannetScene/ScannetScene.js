@@ -1,15 +1,21 @@
-import { useSelector } from "react-redux"
+import * as THREE from 'three'
+import { useSelector, useDispatch } from "react-redux"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { coordsSelector, colorsSelector } from './scannetSceneSlice'
+import { coordsSelector, colorsSelector, currentPosSelector, setCurrentPos } from './scannetSceneSlice'
 import { BufferAttribute } from "three"
+import { useFrame } from "@react-three/fiber"
 
-const ScannetScene = () => {
+const ScannetScene = ({ canvasSceneRef, canvasPointerRef, canvasSphereSize, canvasSetSphereSize }) => {
     const vertices = useSelector((state) => coordsSelector(state))
     const colors = useSelector((state) => colorsSelector(state))
-    const pointsThreeObj = useRef()
     const [pointSize, setPointSize] = useState(0.01)
     const verticesCached = useMemo(() => new BufferAttribute(new Float32Array(vertices), 3), [vertices])
     const colorsCached = useMemo(() => new BufferAttribute(new Float32Array(colors), 3), [colors])
+    const [position, setPosition] = useState(new THREE.Vector3(0, 0, 0))
+
+    const handlePointerMove = (e) => {
+        console.log(e)
+    }
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -21,6 +27,12 @@ const ScannetScene = () => {
                 case 'd':
                     if (pointSize / 1.2 >= 0.01)
                         setPointSize(pointSize / 1.2)
+                    break
+                case '+':
+                    canvasSetSphereSize(canvasSphereSize * 1.02)
+                    break
+                case '-':
+                    canvasSetSphereSize(canvasSphereSize * 0.98)
                     break
                 default:
                     break
@@ -36,9 +48,16 @@ const ScannetScene = () => {
             document.removeEventListener('keydown', handleKeyDown)
             document.removeEventListener('keyup', handleKeyUp)
         }
-    }, [pointSize])
+    }, [pointSize, canvasSphereSize])
+
+    useFrame((state) => {
+        canvasPointerRef.current.position.copy(position)
+    })
+
     return (
-        <points ref={pointsThreeObj}>
+        <points
+            onPointerMove={(e) => (setPosition(e.point))}
+            ref={canvasSceneRef}>
             <bufferGeometry>
                 <bufferAttribute attach={"attributes-position"} {...verticesCached} />
                 <bufferAttribute attach={"attributes-color"} {...colorsCached} />

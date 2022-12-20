@@ -2,11 +2,11 @@ import { useSelector } from "react-redux"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { BufferAttribute } from "three"
 
-const SpherePointer = () => {
+const SpherePointer = ({ canvasPointerRef, canvasSphereSize }) => {
 
     return (
-        <mesh position={{ x: 0.5, y: 0.5, z: 0.5 }}>
-            <sphereGeometry args={[0.5, 32, 32]} />
+        <mesh ref={canvasPointerRef} position={[0.5, 0.5, 0.5]}>
+            <sphereGeometry args={[canvasSphereSize, 32, 32]} />
             <meshBasicMaterial color={0xff0000} />
         </mesh>
     )
