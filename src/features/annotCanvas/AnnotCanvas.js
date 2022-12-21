@@ -35,14 +35,16 @@ const AnnotCanvas = () => {
                     Points: {
                         threshold: 0.01
                     }
-                }
+                },
+                filter: items => items.slice(0, 1)
             }}
             ref={canvasRef}
             dpr={window.devicePixelRatio}
-            gl={{ antialias: true }}>
-            <color attach="background" args={['#202020']} />
-            <ambientLight color="#888888" />
-            <pointLight color="#888888" position={[0, 0, 3]} castShadow={true} />
+            gl={{ antialias: true, dofAutofocus: true }}
+            onCreated={state => state.gl.setClearColor("#ffffff")}>
+            {/*<color attach="background" args={['#202020']} />*/}
+            <ambientLight color={0x888888} />
+            <pointLight color={0x888888} position={[0, 0, 3]} castShadow={true} />
             <ScannetScene canvasSceneRef={sceneRef} canvasPointerRef={pointerRef} canvasSetSphereSize={setSphereSize} canvasSphereSize={sphereSize} />
             <SpherePointer canvasPointerRef={pointerRef} canvasSphereSize={sphereSize} />
             <OrbitControls

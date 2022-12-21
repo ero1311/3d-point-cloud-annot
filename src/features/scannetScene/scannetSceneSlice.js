@@ -10,11 +10,6 @@ const initialState = {
     coords: null,
     colors: null,
     count: null,
-    currentPos: {
-        x: 0,
-        y: 0,
-        z: 0
-    }
 }
 
 export const fetchPoints = createAsyncThunk('scannetScene/fetchPoints', async (filename) => {
@@ -28,8 +23,7 @@ const scannetSceneSlice = createSlice({
     reducers: {
         setCoords: (state, action) => { state.coords = action.payload },
         setColors: (state, action) => { state.colors = action.payload },
-        setCount: (state, action) => { state.count = action.payload },
-        setCurrentPos: (state, action) => { state.currentPos = action.payload }
+        setCount: (state, action) => { state.count = action.payload }
     },
     extraReducers: (builder) => {
         builder
@@ -47,8 +41,7 @@ const scannetSceneSlice = createSlice({
 export const {
     setColors,
     setCoords,
-    setCount,
-    setCurrentPos
+    setCount
 } = scannetSceneSlice.actions
 
 export default scannetSceneSlice.reducer
@@ -57,4 +50,3 @@ export const coordsSelector = (state) => state.scannetScene.coords;
 export const colorsSelector = (state) => state.scannetScene.colors;
 export const statusSelector = (state) => state.scannetScene.status;
 export const countSelector = (state) => state.scannetScene.count;
-export const currentPosSelector = (state) => state.scannetScene.currentPos;

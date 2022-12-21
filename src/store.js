@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit'
+import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 
 import timerReducer from './features/timer/timerSlice'
 import annotBarReducer from './features/annotBar/annotBarSlice'
@@ -12,6 +12,10 @@ const store = configureStore({
     sceneSelector: sceneSelectorReducer,
     scannetScene: scannetSceneReducer
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false
+    })
 })
 
 export default store

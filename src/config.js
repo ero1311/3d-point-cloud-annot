@@ -185,3 +185,13 @@ export const config = {
     ],
     scenes: ['scene0237_01', 'scene0042_01', 'scene0116_00', 'scene0183_00', 'scene0003_01', 'scene0080_02', 'scene0332_00', 'scene0103_01', 'scene0337_01', 'scene0192_00', 'scene0150_02', 'scene0332_01', 'scene0371_00', 'scene0078_01', 'scene0260_00']
 }
+
+export const colorList = config.labels.map((item) => {
+    let r, g, b
+    [r, g, b] = item.color
+    r = r / 255
+    b = b / 255
+    g = g / 255
+
+    return [r, g, b]
+})
