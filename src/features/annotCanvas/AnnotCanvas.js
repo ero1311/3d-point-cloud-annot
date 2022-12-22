@@ -42,7 +42,7 @@ const AnnotCanvas = () => {
             dpr={window.devicePixelRatio}
             gl={{ antialias: true, dofAutofocus: true }}
             onCreated={state => state.gl.setClearColor("#ffffff")}>
-            {/*<color attach="background" args={['#202020']} />*/}
+            <color attach="background" args={['#202020']} />
             <ambientLight color={0x888888} />
             <pointLight color={0x888888} position={[0, 0, 3]} castShadow={true} />
             <ScannetScene canvasSceneRef={sceneRef} canvasPointerRef={pointerRef} canvasSetSphereSize={setSphereSize} canvasSphereSize={sphereSize} />
