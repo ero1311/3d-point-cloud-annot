@@ -10,7 +10,7 @@ const SCREEN_WIDTH = 0.84 * window.innerWidth
 const SCREEN_HEIGHT = 0.83 * window.innerHeight
 const ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT
 
-const AnnotCanvas = () => {
+const AnnotCanvas = ({ instPositiveClicks, instNegativeClicks, instSetPositiveClicks, instSetNegativeClicks }) => {
     const canvasRef = useRef()
     const sceneRef = useRef()
     const pointerRef = useRef()
@@ -45,7 +45,16 @@ const AnnotCanvas = () => {
             <color attach="background" args={['#202020']} />
             <ambientLight color={0x888888} />
             <pointLight color={0x888888} position={[0, 0, 3]} castShadow={true} />
-            <ScannetScene canvasSceneRef={sceneRef} canvasPointerRef={pointerRef} canvasSetSphereSize={setSphereSize} canvasSphereSize={sphereSize} />
+            <ScannetScene
+                canvasSceneRef={sceneRef}
+                canvasPointerRef={pointerRef}
+                canvasSetSphereSize={setSphereSize}
+                canvasSphereSize={sphereSize}
+                canvasInstPositiveClicks={instPositiveClicks}
+                canvasInstNegativeClicks={instNegativeClicks}
+                canvasSetPositiveClicks={instSetPositiveClicks}
+                canvasSetNegativeClicks={instSetNegativeClicks}
+            />
             <SpherePointer canvasPointerRef={pointerRef} canvasSphereSize={sphereSize} />
             <OrbitControls
                 enableDamping={false}

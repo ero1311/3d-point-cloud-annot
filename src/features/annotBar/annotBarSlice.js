@@ -29,6 +29,21 @@ export const saveNewInstance = createAsyncThunk(
     }
 )
 
+export const predictInstance = createAsyncThunk(
+    'annot/predictInstance',
+    async (instance) => {
+        const response = await axios.post('http://' + config.host + ':' + config.inter_port + '/predict-instance', {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: {
+                instance: instance
+            }
+        })
+        return response.data
+    }
+)
+
 export const loadAnnotations = createAsyncThunk(
     'annot/loadAnnots',
     async (sceneName) => {
@@ -43,12 +58,19 @@ const annotBarSlice = createSlice({
     initialState,
     reducers: {
         setClass: (state, action) => { state.classIndexSelected = action.payload },
-        setAnnotStatus: (state, action) => {state.annotations.loadStatus = action.payload},
+        setAnnotStatus: (state, action) => { state.annotations.loadStatus = action.payload },
         removeInstance: (state, action) => {
             let id = action.payload
             let idIndex = state.annotations.idx.findIndex((element) => element === id)
             state.annotations.idx.splice(idIndex, 1)
             delete state.annotations.instances[id]
+        },
+        resetAnnot: (state, action) => {
+            state.annotations = {
+                loadStatus: 'idle',
+                idx: [],
+                instances: {}
+            }
         }
     },
     extraReducers: (builder) => {
@@ -62,12 +84,18 @@ const annotBarSlice = createSlice({
                 state.annotations.idx = [...action.payload.data.idx]
                 state.annotations.instances = action.payload.data.instances
             })
+            .addCase(predictInstance.fulfilled, (state, action) => {
+                state.annotations.loadStatus = 'updated'
+                state.annotations.idx.push(action.payload.data.id)
+                state.annotations.instances[action.payload.data.id] = action.payload.data.instance
+            })
     }
 })
 export const {
     setClass,
     setAnnotStatus,
-    removeInstance
+    removeInstance,
+    resetAnnot
 } = annotBarSlice.actions
 
 export default annotBarSlice.reducer

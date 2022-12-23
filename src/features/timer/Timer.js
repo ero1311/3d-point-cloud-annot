@@ -82,7 +82,6 @@ const Timer = () => {
     useEffect(() => {
         if (running) {
             const id = setInterval(() => dispatch(setTime(timer + 1)), 1000);
-            console.log("time", timer);
             return () => {
                 clearInterval(id);
             };
@@ -104,7 +103,7 @@ const Timer = () => {
             <Grid m={2} className={classes.root}>
                 <Grid item></Grid>
                 <Grid item></Grid>
-                <Grid item>{timer ? formatTime() : "toggle timer to start"}</Grid>
+                <Grid item>{formatTime()}</Grid>
             </Grid>
         </>
     );

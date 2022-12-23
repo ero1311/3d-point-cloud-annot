@@ -2,13 +2,19 @@ import { config } from '../../config';
 import { List, ListItemButton, ListItemText, Box, Typography } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { classIndexSelector, setClass } from './annotBarSlice';
+import { setTimerRunning } from '../timer/timerSlice';
+
 
 const AnnotBarSelector = () => {
     const selectedClassIndex = useSelector((state) => classIndexSelector(state))
     const dispatch = useDispatch()
 
     const handleClassClick = (classItemIndex) => {
+        if (selectedClassIndex === null){
+            dispatch(setTimerRunning(true))
+        }
         dispatch(setClass(classItemIndex));
+        
     }
 
     return (

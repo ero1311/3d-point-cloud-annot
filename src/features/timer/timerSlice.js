@@ -14,12 +14,12 @@ const timerSlice = createSlice({
     name: 'timer',
     initialState,
     reducers: {
-        toggleTimer: (state, action) => { state.running = !state.running },
+        setTimerRunning: (state, action) => { state.running = action.payload },
         setTime: (state, action) => { state.time = action.payload }
     }
 })
 export const {
-    toggleTimer,
+    setTimerRunning,
     setTime,
 } = timerSlice.actions
 
