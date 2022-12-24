@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { useSelector, useDispatch } from "react-redux"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { coordsSelector, colorsSelector } from './scannetSceneSlice'
 import { saveNewInstance } from '../annotBar/annotBarSlice'
 import { BufferAttribute } from "three"
@@ -20,8 +20,6 @@ const ScannetScene = ({
     canvasSetPositiveClicks,
     canvasSetNegativeClicks
 }) => {
-    const camera = useThree((state) => state.camera)
-    const pointer = useThree((state) => state.pointer)
     const raycaster = useThree((state) => state.raycaster)
     const annotInstances = useSelector((state) => annotInstanceSelector(state))
     const selectedClassIndex = useSelector((state) => classIndexSelector(state))
@@ -39,33 +37,54 @@ const ScannetScene = ({
     const [annotInstance, setAnnotInstance] = useState([])
     const dispatch = useDispatch()
 
-    const handleMove = (e) => {
+    const colorSphereSelect = useCallback((point, toColor) => {
+        let coloredPoints = []
+        for (let i = 0; i < canvasSceneRef.current.geometry.attributes.position.count; i++) {
+            const x = canvasSceneRef.current.geometry.attributes.position.getX(i)
+            const y = canvasSceneRef.current.geometry.attributes.position.getY(i)
+            const z = canvasSceneRef.current.geometry.attributes.position.getZ(i)
+            const point3 = new THREE.Vector3(x, y, z)
+            if (point3.distanceTo(point) <= canvasSphereSize) {
+                coloredPoints.push(i)
+                canvasSceneRef.current.geometry.attributes.color.setXYZ(i, toColor[0], toColor[1], toColor[2])
+            }
+        }
+
+        return coloredPoints
+    }, [canvasSceneRef, canvasSphereSize])
+
+    const colorPosNegClicks = (clicksPlaced, toColor) => {
+        Object.keys(clicksPlaced).forEach((key) => {
+            let currClickSphere = clicksPlaced[key]
+            currClickSphere.forEach((index) => {
+                canvasSceneRef.current.geometry.attributes.color.setXYZ(index, toColor[0], toColor[1], toColor[2])
+            })
+        })
+    }
+
+    const handleMove = useCallback((e) => {
         const selectedPoint = e.intersections[0].point
         setPosition(selectedPoint)
         if (annotNeedsUpdate) {
             let currentInst = [...annotInstance]
             const classColor = colorList[selectedClassIndex]
-            for (let i = 0; i < canvasSceneRef.current.geometry.attributes.position.count; i++) {
-                const x = canvasSceneRef.current.geometry.attributes.position.getX(i)
-                const y = canvasSceneRef.current.geometry.attributes.position.getY(i)
-                const z = canvasSceneRef.current.geometry.attributes.position.getZ(i)
-                const point3 = new THREE.Vector3(x, y, z)
-                if (point3.distanceTo(selectedPoint) <= canvasSphereSize) {
-                    currentInst.push(i)
-                    canvasSceneRef.current.geometry.attributes.color.setXYZ(i, classColor[0], classColor[1], classColor[2])
-                }
-            }
+            let selectedPoints = colorSphereSelect(selectedPoint, classColor)
+            currentInst.push(...selectedPoints)
             setColorNeedsUpdate(true)
             setAnnotInstance([...currentInst])
         }
-    }
+    }, [annotNeedsUpdate,
+        annotInstance,
+        selectedClassIndex,
+        colorSphereSelect
+    ])
 
     useEffect(() => {
         if (annotLoadStatus === 'idle') {
             dispatch(loadAnnotations(selectedSceneName))
         }
         const handleKeyDown = (e) => {
-            let intersection, classColor, selected_x, selected_y, selected_z, selectedPoint, clickSphere
+            let intersection, classColor, clickSphere
             switch (e.key) {
                 case 'i':
                     if (pointSize * 1.2 <= 0.5)
@@ -87,26 +106,11 @@ const ScannetScene = ({
                     console.log(annotNeedsUpdate, annotInstance)
                     break
                 case 'p':
-                    clickSphere = []
-                    raycaster.setFromCamera(pointer, camera)
                     intersection = raycaster.intersectObject(canvasSceneRef.current, true)
                     if (intersection.length > 0) {
                         intersection = intersection[0]
                         classColor = [0., 1., 0.]
-                        selected_x = canvasSceneRef.current.geometry.attributes.position.getX(intersection.index)
-                        selected_y = canvasSceneRef.current.geometry.attributes.position.getY(intersection.index)
-                        selected_z = canvasSceneRef.current.geometry.attributes.position.getZ(intersection.index)
-                        selectedPoint = new THREE.Vector3(selected_x, selected_y, selected_z)
-                        for (let i = 0; i < canvasSceneRef.current.geometry.attributes.position.count; i++) {
-                            const x = canvasSceneRef.current.geometry.attributes.position.getX(i)
-                            const y = canvasSceneRef.current.geometry.attributes.position.getY(i)
-                            const z = canvasSceneRef.current.geometry.attributes.position.getZ(i)
-                            const point3 = new THREE.Vector3(x, y, z)
-                            if (point3.distanceTo(selectedPoint) <= canvasSphereSize) {
-                                clickSphere.push(i)
-                                canvasSceneRef.current.geometry.attributes.color.setXYZ(i, classColor[0], classColor[1], classColor[2])
-                            }
-                        }
+                        clickSphere = colorSphereSelect(intersection.point, classColor)
                         clickSphere.push(intersection.index)
                         canvasSetPositiveClicks((clicks) => ({
                             ...clicks,
@@ -116,26 +120,11 @@ const ScannetScene = ({
                     }
                     break
                 case 'n':
-                    clickSphere = []
-                    raycaster.setFromCamera(pointer, camera)
                     intersection = raycaster.intersectObject(canvasSceneRef.current, true)
                     if (intersection.length > 0) {
                         intersection = intersection[0]
                         classColor = [1., 0., 0.]
-                        selected_x = canvasSceneRef.current.geometry.attributes.position.getX(intersection.index)
-                        selected_y = canvasSceneRef.current.geometry.attributes.position.getY(intersection.index)
-                        selected_z = canvasSceneRef.current.geometry.attributes.position.getZ(intersection.index)
-                        selectedPoint = new THREE.Vector3(selected_x, selected_y, selected_z)
-                        for (let i = 0; i < canvasSceneRef.current.geometry.attributes.position.count; i++) {
-                            const x = canvasSceneRef.current.geometry.attributes.position.getX(i)
-                            const y = canvasSceneRef.current.geometry.attributes.position.getY(i)
-                            const z = canvasSceneRef.current.geometry.attributes.position.getZ(i)
-                            const point3 = new THREE.Vector3(x, y, z)
-                            if (point3.distanceTo(selectedPoint) <= canvasSphereSize) {
-                                clickSphere.push(i)
-                                canvasSceneRef.current.geometry.attributes.color.setXYZ(i, classColor[0], classColor[1], classColor[2])
-                            }
-                        }
+                        clickSphere = colorSphereSelect(intersection.point, classColor)
                         clickSphere.push(intersection.index)
                         canvasSetNegativeClicks((clicks) => ({
                             ...clicks,
@@ -184,7 +173,12 @@ const ScannetScene = ({
         annotNeedsUpdate,
         selectedClassIndex,
         selectedSceneName,
-        annotLoadStatus
+        annotLoadStatus,
+        canvasSceneRef,
+        canvasSetNegativeClicks,
+        canvasSetPositiveClicks,
+        colorSphereSelect,
+        raycaster
     ])
 
     useFrame((state) => {
@@ -204,21 +198,9 @@ const ScannetScene = ({
                 })
                 annotTime = annotInstances[key].time
             })
-            if (annotLoadStatus === 'updated'){
-                Object.keys(canvasInstPositiveClicks).forEach((key) => {
-                    let currClickSphere = canvasInstPositiveClicks[key]
-                    let currColor = [0., 1., 0.]
-                    currClickSphere.forEach((index) => {
-                        canvasSceneRef.current.geometry.attributes.color.setXYZ(index, currColor[0], currColor[1], currColor[2])
-                    })
-                })
-                Object.keys(canvasInstNegativeClicks).forEach((key) => {
-                    let currClickSphere = canvasInstNegativeClicks[key]
-                    let currColor = [1., 0., 0.]
-                    currClickSphere.forEach((index) => {
-                        canvasSceneRef.current.geometry.attributes.color.setXYZ(index, currColor[0], currColor[1], currColor[2])
-                    })
-                })
+            if (annotLoadStatus === 'updated') {
+                colorPosNegClicks(canvasInstPositiveClicks, [0., 1., 0.])
+                colorPosNegClicks(canvasInstNegativeClicks, [1., 0., 0.])
             }
             dispatch(setTime(annotTime))
             canvasSceneRef.current.geometry.attributes.color.needsUpdate = true
@@ -228,7 +210,7 @@ const ScannetScene = ({
 
     return (
         <points
-            onPointerMove={(e) => handleMove(e)}
+            onPointerMove={handleMove}
             ref={canvasSceneRef}>
             <bufferGeometry>
                 <bufferAttribute attach={"attributes-position"} {...verticesCached} />

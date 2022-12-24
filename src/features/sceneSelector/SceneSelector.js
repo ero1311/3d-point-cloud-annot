@@ -20,8 +20,8 @@ const SceneSelector = () => {
 
     return (
         <>
-            <TextField select defaultValue="" label="Scene" onChange={(event) => handleSceneSelect(event)} color="primary" sx={{ marginTop: "5px" }}>
-                <MenuItem value=""><em>None</em></MenuItem>
+            <TextField select defaultValue="None" label="Scene" onChange={(event) => handleSceneSelect(event)} color="primary" sx={{ marginTop: "5px" }}>
+                <MenuItem value="None"><em>None</em></MenuItem>
                 {config.scenes.map((item, index) => (
                     <MenuItem key={index} value={item}><Typography color="text.primary">{item}</Typography></MenuItem>
                 ))}

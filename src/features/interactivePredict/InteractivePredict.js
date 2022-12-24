@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { predictInstance, classIndexSelector, setAnnotStatus} from '../annotBar/annotBarSlice';
+import { predictInstance, classIndexSelector, setAnnotStatus } from '../annotBar/annotBarSlice';
 import { timeSelector } from '../timer/timerSlice';
 import { sceneSelector } from '../sceneSelector/sceneSelectorSlice';
 
@@ -37,7 +37,7 @@ const InteractivePredict = ({
     return (
         <>
             <Button variant='contained' onClick={(e) => handlePrediction(e)}>Predict</Button>
-            <Button variant='contained' onClick={(e) => handleFinishInstance(e)}>Finish Instance</Button>
+            <Button variant='contained' onClick={(e) => handleFinishInstance(e)} sx={{ marginLeft: "5px" }}>Finish Instance</Button>
         </>
     )
 }

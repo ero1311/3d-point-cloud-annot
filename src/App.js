@@ -10,7 +10,7 @@ import InteractivePredict from "./features/interactivePredict/InteractivePredict
 import TimerTheme from './features/timer/TimerTheme'
 import { ThemeProvider } from '@mui/material/styles'
 import { statusSelector } from './features/scannetScene/scannetSceneSlice'
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 
 function App() {
@@ -18,9 +18,6 @@ function App() {
   const [negativeClicks, setNegativeClicks] = useState({})
   const sceneLoadingStatus = useSelector((state) => statusSelector(state))
 
-  useEffect(() => {
-    console.log(positiveClicks, negativeClicks)
-  }, [positiveClicks, negativeClicks])
   return (
     <ThemeProvider theme={TimerTheme}>
       <div className="App">
