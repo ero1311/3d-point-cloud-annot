@@ -216,7 +216,7 @@ const ScannetScene = ({
                 colorPosNegClicks(canvasInstPositiveClicks, [0., 1., 0.])
                 colorPosNegClicks(canvasInstNegativeClicks, [1., 0., 0.])
             } else {
-                canvasSetNegativeClicks({})
+                canvasSetPositiveClicks({})
                 canvasSetNegativeClicks({})
             }
             dispatch(setTime(annotTime))
