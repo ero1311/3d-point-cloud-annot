@@ -1,5 +1,4 @@
-import { useSelector } from "react-redux"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import ScannetScene from "../scannetScene/ScannetScene"
@@ -10,7 +9,14 @@ const SCREEN_WIDTH = 0.84 * window.innerWidth
 const SCREEN_HEIGHT = 0.83 * window.innerHeight
 const ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT
 
-const AnnotCanvas = ({ instPositiveClicks, instNegativeClicks, instSetPositiveClicks, instSetNegativeClicks }) => {
+const AnnotCanvas = ({
+    instPositiveClicks,
+    instNegativeClicks,
+    instSetPositiveClicks,
+    instSetNegativeClicks,
+    currAnnotInstance,
+    currSetAnnotInstance,
+}) => {
     const canvasRef = useRef()
     const sceneRef = useRef()
     const pointerRef = useRef()
@@ -18,9 +24,6 @@ const AnnotCanvas = ({ instPositiveClicks, instNegativeClicks, instSetPositiveCl
 
     useBVH(sceneRef)
 
-    useEffect(() => {
-        console.log(sceneRef, pointerRef)
-    }, [])
     return (
         <Canvas camera={{
             fov: 75,
@@ -54,6 +57,8 @@ const AnnotCanvas = ({ instPositiveClicks, instNegativeClicks, instSetPositiveCl
                 canvasInstNegativeClicks={instNegativeClicks}
                 canvasSetPositiveClicks={instSetPositiveClicks}
                 canvasSetNegativeClicks={instSetNegativeClicks}
+                canvasAnnotInstance={currAnnotInstance}
+                canvasSetAnnotInstance={currSetAnnotInstance}
             />
             <SpherePointer canvasPointerRef={pointerRef} canvasSphereSize={sphereSize} />
             <OrbitControls

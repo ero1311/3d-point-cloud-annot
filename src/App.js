@@ -16,6 +16,7 @@ import { useState } from "react"
 function App() {
   const [positiveClicks, setPositiveClicks] = useState({})
   const [negativeClicks, setNegativeClicks] = useState({})
+  const [annotInstance, setAnnotInstance] = useState([])
   const sceneLoadingStatus = useSelector((state) => statusSelector(state))
 
   return (
@@ -34,8 +35,7 @@ function App() {
               <InteractivePredict
                 instPositiveClicks={positiveClicks}
                 instNegativeClicks={negativeClicks}
-                instSetPositiveClicks={setPositiveClicks}
-                instSetNegativeClicks={setNegativeClicks}
+                currSetAnnotInstance={setAnnotInstance}
               />
             </Grid>
             <Grid item xs={3}>
@@ -51,11 +51,18 @@ function App() {
                   instNegativeClicks={negativeClicks}
                   instSetPositiveClicks={setPositiveClicks}
                   instSetNegativeClicks={setNegativeClicks}
+                  currAnnotInstance={annotInstance}
+                  currSetAnnotInstance={setAnnotInstance}
                 />
                 : <CircularProgress sx={{ marginTop: "25%" }} />}
             </Grid>
             <Grid item xs={2}>
-              <AnnotBarSelector />
+              <AnnotBarSelector
+                instPositiveClicks={positiveClicks}
+                instNegativeClicks={negativeClicks}
+                currAnnotInstance={annotInstance}
+                currSetAnnotInstance={setAnnotInstance}
+              />
             </Grid>
             <Grid item xs={10}>
               <Paper />

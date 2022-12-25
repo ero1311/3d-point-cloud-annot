@@ -9,7 +9,7 @@ const initialState = {
     classIndexSelected: null,
     annotations: {
         loadStatus: 'idle',
-        idx: [],
+        currId: null,
         instances: {}
     }
 }
@@ -29,26 +29,10 @@ export const saveNewInstance = createAsyncThunk(
     }
 )
 
-export const predictInstance = createAsyncThunk(
-    'annot/predictInstance',
-    async (instance) => {
-        const response = await axios.post('http://' + config.host + ':' + config.inter_port + '/predict-instance', {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: {
-                instance: instance
-            }
-        })
-        return response.data
-    }
-)
-
 export const loadAnnotations = createAsyncThunk(
     'annot/loadAnnots',
     async (sceneName) => {
         const response = await axios.get('http://' + config.host + ':' + config.inter_port + '/load/' + sceneName)
-        console.log(response.data)
         return response.data
     }
 )
@@ -76,18 +60,14 @@ const annotBarSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(saveNewInstance.fulfilled, (state, action) => {
-                state.annotations.idx.push(action.payload.data.id)
-                state.annotations.instances[action.payload.data.id] = action.payload.data.instance
+                state.annotations.loadStatus = 'loaded'
+                state.annotations.currId = action.payload.data.currId
+                state.annotations.instances[String(action.payload.data.currId - 1)] = action.payload.data.instance
             })
             .addCase(loadAnnotations.fulfilled, (state, action) => {
                 state.annotations.loadStatus = 'loaded'
-                state.annotations.idx = [...action.payload.data.idx]
+                state.annotations.currId = action.payload.data.currId
                 state.annotations.instances = action.payload.data.instances
-            })
-            .addCase(predictInstance.fulfilled, (state, action) => {
-                state.annotations.loadStatus = 'updated'
-                state.annotations.idx.push(action.payload.data.id)
-                state.annotations.instances[action.payload.data.id] = action.payload.data.instance
             })
     }
 })
@@ -103,3 +83,4 @@ export default annotBarSlice.reducer
 export const classIndexSelector = (state) => state.annotBar.classIndexSelected;
 export const annotLoadSelector = (state) => state.annotBar.annotations.loadStatus;
 export const annotInstanceSelector = (state) => state.annotBar.annotations.instances;
+export const annotCurrIdSelector = (state) => state.annotBar.annotations.currId;

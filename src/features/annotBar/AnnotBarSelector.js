@@ -1,20 +1,35 @@
 import { config } from '../../config';
 import { List, ListItemButton, ListItemText, Box, Typography } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { classIndexSelector, setClass } from './annotBarSlice';
+import { classIndexSelector, setClass, saveNewInstance, annotCurrIdSelector } from './annotBarSlice';
 import { setTimerRunning } from '../timer/timerSlice';
+import { timeSelector } from '../timer/timerSlice';
+import { sceneSelector } from '../sceneSelector/sceneSelectorSlice';
 
-
-const AnnotBarSelector = () => {
+const AnnotBarSelector = ({ instPositiveClicks, instNegativeClicks, currAnnotInstance, currSetAnnotInstance }) => {
     const selectedClassIndex = useSelector((state) => classIndexSelector(state))
+    const currId = useSelector((state) => annotCurrIdSelector(state))
+    const currentTime = useSelector((state) => timeSelector(state))
+    const currentScene = useSelector((state) => sceneSelector(state))
     const dispatch = useDispatch()
 
     const handleClassClick = (classItemIndex) => {
-        if (selectedClassIndex === null){
+        if (selectedClassIndex === null) {
             dispatch(setTimerRunning(true))
+        } else {
+            dispatch(saveNewInstance({
+                currId: currId,
+                classIndex: selectedClassIndex,
+                points: [...currAnnotInstance],
+                posClicks: [...Object.keys(instPositiveClicks)],
+                negClicks: [...Object.keys(instNegativeClicks)],
+                time: currentTime,
+                sceneName: currentScene
+            }))
+            currSetAnnotInstance(prevInst => [])
         }
         dispatch(setClass(classItemIndex));
-        
+
     }
 
     return (

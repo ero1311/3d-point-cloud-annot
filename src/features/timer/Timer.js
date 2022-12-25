@@ -90,13 +90,6 @@ const Timer = () => {
     }, [timer, dispatch, running]);
 
 
-    // useEffect(() => {
-    //     if (timer.running) {
-    //         intervalRef.current = setTimeout(() => dispatch(timerSaveTime(timer.time + 0.1)), 100)
-    //         return () => clearTimeout(intervalRef.current);
-    //     }
-    // }, [timer.time, timer.running]);
-
     const classes = useClasses(styles);
     return (
         <>

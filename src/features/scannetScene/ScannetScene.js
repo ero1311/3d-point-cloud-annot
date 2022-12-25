@@ -5,7 +5,7 @@ import { coordsSelector, colorsSelector } from './scannetSceneSlice'
 import { saveNewInstance } from '../annotBar/annotBarSlice'
 import { BufferAttribute } from "three"
 import { useFrame, useThree } from "@react-three/fiber"
-import { classIndexSelector, annotInstanceSelector, annotLoadSelector, loadAnnotations, setAnnotStatus } from '../annotBar/annotBarSlice'
+import { classIndexSelector, annotInstanceSelector, annotLoadSelector, annotCurrIdSelector, loadAnnotations, setAnnotStatus } from '../annotBar/annotBarSlice'
 import { timeSelector, setTime } from '../timer/timerSlice'
 import { colorList } from '../../config'
 import { sceneSelector } from '../sceneSelector/sceneSelectorSlice'
@@ -18,9 +18,12 @@ const ScannetScene = ({
     canvasInstPositiveClicks,
     canvasInstNegativeClicks,
     canvasSetPositiveClicks,
-    canvasSetNegativeClicks
+    canvasSetNegativeClicks,
+    canvasAnnotInstance,
+    canvasSetAnnotInstance
 }) => {
     const raycaster = useThree((state) => state.raycaster)
+    const currId = useSelector((state) => annotCurrIdSelector(state))
     const annotInstances = useSelector((state) => annotInstanceSelector(state))
     const selectedClassIndex = useSelector((state) => classIndexSelector(state))
     const annotLoadStatus = useSelector((state) => annotLoadSelector(state))
@@ -34,7 +37,6 @@ const ScannetScene = ({
     const [position, setPosition] = useState(new THREE.Vector3(0, 0, 0))
     const [annotNeedsUpdate, setAnnotNeedsUpdate] = useState(false)
     const [colorNeedsUpdate, setColorNeedsUpdate] = useState(false)
-    const [annotInstance, setAnnotInstance] = useState([])
     const dispatch = useDispatch()
 
     const colorSphereSelect = useCallback((point, toColor) => {
@@ -66,15 +68,16 @@ const ScannetScene = ({
         const selectedPoint = e.intersections[0].point
         setPosition(selectedPoint)
         if (annotNeedsUpdate) {
-            let currentInst = [...annotInstance]
+            let currentInst = [...canvasAnnotInstance]
             const classColor = colorList[selectedClassIndex]
             let selectedPoints = colorSphereSelect(selectedPoint, classColor)
             currentInst.push(...selectedPoints)
             setColorNeedsUpdate(true)
-            setAnnotInstance([...currentInst])
+            canvasSetAnnotInstance([...currentInst])
         }
     }, [annotNeedsUpdate,
-        annotInstance,
+        canvasAnnotInstance,
+        canvasSetAnnotInstance,
         selectedClassIndex,
         colorSphereSelect
     ])
@@ -86,26 +89,25 @@ const ScannetScene = ({
         const handleKeyDown = (e) => {
             let intersection, classColor, clickSphere
             switch (e.key) {
-                case 'i':
+                case 'i': //increase point size
                     if (pointSize * 1.2 <= 0.5)
                         setPointSize(pointSize * 1.2)
                     break
-                case 'd':
+                case 'd': //decrease point size
                     if (pointSize / 1.2 >= 0.01)
                         setPointSize(pointSize / 1.2)
                     break
-                case '+':
+                case '+': //increase pointer size
                     canvasSetSphereSize(canvasSphereSize * 1.02)
                     break
-                case '-':
+                case '-': //decrease pointer size
                     canvasSetSphereSize(canvasSphereSize * 0.98)
                     break
-                case 'Alt':
+                case 'Alt': //start brush annotation
                     if (selectedClassIndex !== null)
                         setAnnotNeedsUpdate(true)
-                    console.log(annotNeedsUpdate, annotInstance)
                     break
-                case 'p':
+                case 'p': //put positive click
                     intersection = raycaster.intersectObject(canvasSceneRef.current, true)
                     if (intersection.length > 0) {
                         intersection = intersection[0]
@@ -119,7 +121,7 @@ const ScannetScene = ({
                         setColorNeedsUpdate(true)
                     }
                     break
-                case 'n':
+                case 'n': //put negative click
                     intersection = raycaster.intersectObject(canvasSceneRef.current, true)
                     if (intersection.length > 0) {
                         intersection = intersection[0]
@@ -133,23 +135,27 @@ const ScannetScene = ({
                         setColorNeedsUpdate(true)
                     }
                     break
+                case ' ': //finish instance
+                    dispatch(saveNewInstance({
+                        currId: currId,
+                        classIndex: selectedClassIndex,
+                        points: [...canvasAnnotInstance],
+                        posClicks: [...Object.keys(canvasInstPositiveClicks)],
+                        negClicks: [...Object.keys(canvasInstNegativeClicks)],
+                        time: currentTime,
+                        sceneName: selectedSceneName
+                    }))
+                    canvasSetAnnotInstance(prevInst => [])
+                    break
                 default:
                     break
             }
-            console.log("down", e.key)
         }
         const handleKeyUp = (e) => {
             switch (e.key) {
                 case 'Alt':
                     if (annotNeedsUpdate) {
                         setAnnotNeedsUpdate(false)
-                        dispatch(saveNewInstance({
-                            classIndex: selectedClassIndex,
-                            points: [...annotInstance],
-                            time: currentTime,
-                            sceneName: selectedSceneName
-                        }))
-                        setAnnotInstance(prevInst => [])
                     }
                     break
                 default:
@@ -167,14 +173,18 @@ const ScannetScene = ({
         pointSize,
         canvasSphereSize,
         canvasSetSphereSize,
-        annotInstance,
+        canvasAnnotInstance,
+        canvasSetAnnotInstance,
         currentTime,
+        currId,
         dispatch,
         annotNeedsUpdate,
         selectedClassIndex,
         selectedSceneName,
         annotLoadStatus,
         canvasSceneRef,
+        canvasInstPositiveClicks,
+        canvasInstNegativeClicks,
         canvasSetNegativeClicks,
         canvasSetPositiveClicks,
         colorSphereSelect,
@@ -199,8 +209,15 @@ const ScannetScene = ({
                 annotTime = annotInstances[key].time
             })
             if (annotLoadStatus === 'updated') {
+                let instColor = colorList[selectedClassIndex]
+                canvasAnnotInstance.forEach((item) => {
+                    canvasSceneRef.current.geometry.attributes.color.setXYZ(item, instColor[0], instColor[1], instColor[2])
+                })
                 colorPosNegClicks(canvasInstPositiveClicks, [0., 1., 0.])
                 colorPosNegClicks(canvasInstNegativeClicks, [1., 0., 0.])
+            } else {
+                canvasSetNegativeClicks({})
+                canvasSetNegativeClicks({})
             }
             dispatch(setTime(annotTime))
             canvasSceneRef.current.geometry.attributes.color.needsUpdate = true
