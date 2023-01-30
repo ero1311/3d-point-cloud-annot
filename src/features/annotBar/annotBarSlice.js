@@ -37,6 +37,15 @@ export const loadAnnotations = createAsyncThunk(
     }
 )
 
+export const preAnnotate = createAsyncThunk(
+    'annot/preAnnotate',
+    async (sceneName) => {
+        const response = await axios.get('http://' + config.host + ':' + config.inter_port + '/annotate/' + sceneName)
+        return response.data
+    }
+)
+
+
 const annotBarSlice = createSlice({
     name: 'annotBar',
     initialState,
@@ -65,6 +74,11 @@ const annotBarSlice = createSlice({
                 state.annotations.instances[String(action.payload.data.currId - 1)] = action.payload.data.instance
             })
             .addCase(loadAnnotations.fulfilled, (state, action) => {
+                state.annotations.loadStatus = 'loaded'
+                state.annotations.currId = action.payload.data.currId
+                state.annotations.instances = action.payload.data.instances
+            })
+            .addCase(preAnnotate.fulfilled, (state, action) => {
                 state.annotations.loadStatus = 'loaded'
                 state.annotations.currId = action.payload.data.currId
                 state.annotations.instances = action.payload.data.instances

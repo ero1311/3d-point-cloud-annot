@@ -1,7 +1,3 @@
-import { useSelector } from "react-redux"
-import { useEffect, useMemo, useRef, useState } from "react"
-import { BufferAttribute } from "three"
-
 const SpherePointer = ({ canvasPointerRef, canvasSphereSize }) => {
 
     return (

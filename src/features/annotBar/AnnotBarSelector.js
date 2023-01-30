@@ -13,30 +13,31 @@ const AnnotBarSelector = ({ instPositiveClicks, instNegativeClicks, currAnnotIns
     const currentScene = useSelector((state) => sceneSelector(state))
     const dispatch = useDispatch()
 
-    const handleClassClick = (classItemIndex) => {
-        if (selectedClassIndex === null) {
-            dispatch(setTimerRunning(true))
-        } else {
-            dispatch(saveNewInstance({
-                currId: currId,
-                classIndex: selectedClassIndex,
-                points: [...currAnnotInstance],
-                posClicks: [...Object.keys(instPositiveClicks)],
-                negClicks: [...Object.keys(instNegativeClicks)],
-                time: currentTime,
-                sceneName: currentScene
-            }))
-            currSetAnnotInstance(prevInst => [])
+    const handleClassClick = (e, classItemIndex) => {
+        if (e.type === "click"){
+            if (selectedClassIndex === null) {
+                dispatch(setTimerRunning(true))
+            } else {
+                dispatch(saveNewInstance({
+                    currId: currId,
+                    classIndex: selectedClassIndex,
+                    points: [...currAnnotInstance],
+                    posClicks: [...Object.keys(instPositiveClicks)],
+                    negClicks: [...Object.keys(instNegativeClicks)],
+                    time: currentTime,
+                    sceneName: currentScene
+                }))
+                currSetAnnotInstance(prevInst => [])
+            }
+            dispatch(setClass(classItemIndex));
         }
-        dispatch(setClass(classItemIndex));
-
     }
 
     return (
         <>
             <List>
                 {config.labels.map((item, index) => (
-                    <ListItemButton selected={selectedClassIndex === index} key={item.id} onClick={() => handleClassClick(index)} sx={{ marginLeft: "5px", padding: "0px", "&:hover": { backgroundColor: "rgb(" + item.color[0] + "," + item.color[1] + "," + item.color[2] + ")" }, "&&.Mui-selected": { backgroundColor: "rgb(" + item.color[0] + "," + item.color[1] + "," + item.color[2] + ")" } }}>
+                    <ListItemButton selected={selectedClassIndex === index} key={item.id} onClick={(e) => handleClassClick(e, index)} sx={{ marginLeft: "5px", padding: "0px", "&:hover": { backgroundColor: "rgb(" + item.color[0] + "," + item.color[1] + "," + item.color[2] + ")" }, "&&.Mui-selected": { backgroundColor: "rgb(" + item.color[0] + "," + item.color[1] + "," + item.color[2] + ")" } }}>
                         <Box sx={{ width: "15px", height: "15px", backgroundColor: "rgb(" + item.color[0] + "," + item.color[1] + "," + item.color[2] + ")" }}></Box>
                         <ListItemText disableTypography primary={<Typography color="text.primary">{item.label}</Typography>} sx={{ marginLeft: "5px" }}></ListItemText>
                     </ListItemButton>

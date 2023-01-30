@@ -17,6 +17,7 @@ function App() {
   const [positiveClicks, setPositiveClicks] = useState({})
   const [negativeClicks, setNegativeClicks] = useState({})
   const [annotInstance, setAnnotInstance] = useState([])
+  const [isScribble, setIsScribble] = useState(false)
   const sceneLoadingStatus = useSelector((state) => statusSelector(state))
 
   return (
@@ -28,17 +29,19 @@ function App() {
           backgroundColor: 'background.default'
         }}>
           <Grid container>
-            <Grid item xs={3}>
+            <Grid item xs={2}>
               <Avatar alt="TUM logo" src={tum_logo} variant="square" sx={{ marginTop: "5px", width: 300, height: 56 }}></Avatar>
             </Grid>
-            <Grid item xs={4} sx={{ marginTop: "10px" }}>
+            <Grid item xs={6} sx={{ marginTop: "10px" }}>
               <InteractivePredict
                 instPositiveClicks={positiveClicks}
                 instNegativeClicks={negativeClicks}
                 currSetAnnotInstance={setAnnotInstance}
+                appIsScribble={isScribble}
+                appSetIsScribble={setIsScribble}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={2}>
               <SceneSelector />
             </Grid>
             <Grid item xs={2}>
@@ -53,6 +56,7 @@ function App() {
                   instSetNegativeClicks={setNegativeClicks}
                   currAnnotInstance={annotInstance}
                   currSetAnnotInstance={setAnnotInstance}
+                  appIsScribble={isScribble}
                 />
                 : <CircularProgress sx={{ marginTop: "25%" }} />}
             </Grid>

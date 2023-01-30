@@ -20,7 +20,8 @@ const ScannetScene = ({
     canvasSetPositiveClicks,
     canvasSetNegativeClicks,
     canvasAnnotInstance,
-    canvasSetAnnotInstance
+    canvasSetAnnotInstance,
+    canvasIsScribble
 }) => {
     const raycaster = useThree((state) => state.raycaster)
     const currId = useSelector((state) => annotCurrIdSelector(state))
@@ -36,6 +37,8 @@ const ScannetScene = ({
     const colorsCached = useMemo(() => new BufferAttribute(new Uint8Array(colors), 3, true), [colors])
     const [position, setPosition] = useState(new THREE.Vector3(0, 0, 0))
     const [annotNeedsUpdate, setAnnotNeedsUpdate] = useState(false)
+    const [scribbleNeedsUpdate, setScribbleNeedsUpdate] = useState(false)
+    const [scribbleType, setScribbleType] = useState('positive')
     const [colorNeedsUpdate, setColorNeedsUpdate] = useState(false)
     const dispatch = useDispatch()
 
@@ -65,6 +68,7 @@ const ScannetScene = ({
     }
 
     const handleMove = useCallback((e) => {
+        let classColor
         const selectedPoint = e.intersections[0].point
         setPosition(selectedPoint)
         if (annotNeedsUpdate) {
@@ -74,10 +78,46 @@ const ScannetScene = ({
             currentInst.push(...selectedPoints)
             setColorNeedsUpdate(true)
             canvasSetAnnotInstance([...currentInst])
+        } else {
+            if (scribbleNeedsUpdate) {
+                switch (scribbleType) {
+                    case 'positive':
+                        classColor = [0., 1., 0.]
+                        break
+                    case 'negative':
+                        classColor = [1., 0., 0.]
+                        break
+                    default:
+                        break
+                }
+                let selectedPoints = colorSphereSelect(selectedPoint, classColor)
+                selectedPoints.push(e.intersections[0].index)
+                switch (scribbleType) {
+                    case 'positive':
+                        canvasSetPositiveClicks((clicks) => ({
+                            ...clicks,
+                            [String(e.intersections[0].index)]: selectedPoints
+                        }))
+                        break
+                    case 'negative':
+                        canvasSetNegativeClicks((clicks) => ({
+                            ...clicks,
+                            [String(e.intersections[0].index)]: selectedPoints
+                        }))
+                        break
+                    default:
+                        break
+                }
+                setColorNeedsUpdate(true)
+            }
         }
     }, [annotNeedsUpdate,
+        scribbleNeedsUpdate,
+        scribbleType,
         canvasAnnotInstance,
         canvasSetAnnotInstance,
+        canvasSetNegativeClicks,
+        canvasSetPositiveClicks,
         selectedClassIndex,
         colorSphereSelect
     ])
@@ -110,42 +150,41 @@ const ScannetScene = ({
                 case 'p': //put positive click
                     intersection = raycaster.intersectObject(canvasSceneRef.current, true)
                     if (intersection.length > 0) {
-                        intersection = intersection[0]
-                        classColor = [0., 1., 0.]
-                        clickSphere = colorSphereSelect(intersection.point, classColor)
-                        clickSphere.push(intersection.index)
-                        canvasSetPositiveClicks((clicks) => ({
-                            ...clicks,
-                            [String(intersection.index)]: clickSphere
-                        }))
-                        setColorNeedsUpdate(true)
+                        console.log(canvasIsScribble)
+                        if (canvasIsScribble) {
+                            setScribbleNeedsUpdate(!scribbleNeedsUpdate)
+                            setScribbleType('positive')
+                        } else {
+                            intersection = intersection[0]
+                            classColor = [0., 1., 0.]
+                            clickSphere = colorSphereSelect(intersection.point, classColor)
+                            clickSphere.push(intersection.index)
+                            canvasSetPositiveClicks((clicks) => ({
+                                ...clicks,
+                                [String(intersection.index)]: clickSphere
+                            }))
+                            setColorNeedsUpdate(true)
+                        }
                     }
                     break
                 case 'n': //put negative click
                     intersection = raycaster.intersectObject(canvasSceneRef.current, true)
                     if (intersection.length > 0) {
-                        intersection = intersection[0]
-                        classColor = [1., 0., 0.]
-                        clickSphere = colorSphereSelect(intersection.point, classColor)
-                        clickSphere.push(intersection.index)
-                        canvasSetNegativeClicks((clicks) => ({
-                            ...clicks,
-                            [String(intersection.index)]: clickSphere
-                        }))
-                        setColorNeedsUpdate(true)
+                        if (canvasIsScribble){
+                            setScribbleNeedsUpdate(!scribbleNeedsUpdate)
+                            setScribbleType('negative')
+                        } else {
+                            intersection = intersection[0]
+                            classColor = [1., 0., 0.]
+                            clickSphere = colorSphereSelect(intersection.point, classColor)
+                            clickSphere.push(intersection.index)
+                            canvasSetNegativeClicks((clicks) => ({
+                                ...clicks,
+                                [String(intersection.index)]: clickSphere
+                            }))
+                            setColorNeedsUpdate(true)
+                        }
                     }
-                    break
-                case ' ': //finish instance
-                    dispatch(saveNewInstance({
-                        currId: currId,
-                        classIndex: selectedClassIndex,
-                        points: [...canvasAnnotInstance],
-                        posClicks: [...Object.keys(canvasInstPositiveClicks)],
-                        negClicks: [...Object.keys(canvasInstNegativeClicks)],
-                        time: currentTime,
-                        sceneName: selectedSceneName
-                    }))
-                    canvasSetAnnotInstance(prevInst => [])
                     break
                 default:
                     break
@@ -157,6 +196,19 @@ const ScannetScene = ({
                     if (annotNeedsUpdate) {
                         setAnnotNeedsUpdate(false)
                     }
+                    break
+                case ' ': //finish instance
+                    console.log('space save');
+                    dispatch(saveNewInstance({
+                        currId: currId,
+                        classIndex: selectedClassIndex,
+                        points: [...canvasAnnotInstance],
+                        posClicks: [...Object.keys(canvasInstPositiveClicks)],
+                        negClicks: [...Object.keys(canvasInstNegativeClicks)],
+                        time: currentTime,
+                        sceneName: selectedSceneName
+                    }))
+                    canvasSetAnnotInstance(prevInst => [])
                     break
                 default:
                     break
@@ -175,6 +227,8 @@ const ScannetScene = ({
         canvasSetSphereSize,
         canvasAnnotInstance,
         canvasSetAnnotInstance,
+        canvasIsScribble,
+        scribbleNeedsUpdate,
         currentTime,
         currId,
         dispatch,

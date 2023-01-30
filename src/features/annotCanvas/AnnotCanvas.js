@@ -16,6 +16,7 @@ const AnnotCanvas = ({
     instSetNegativeClicks,
     currAnnotInstance,
     currSetAnnotInstance,
+    appIsScribble
 }) => {
     const canvasRef = useRef()
     const sceneRef = useRef()
@@ -59,6 +60,7 @@ const AnnotCanvas = ({
                 canvasSetNegativeClicks={instSetNegativeClicks}
                 canvasAnnotInstance={currAnnotInstance}
                 canvasSetAnnotInstance={currSetAnnotInstance}
+                canvasIsScribble={appIsScribble}
             />
             <SpherePointer canvasPointerRef={pointerRef} canvasSphereSize={sphereSize} />
             <OrbitControls

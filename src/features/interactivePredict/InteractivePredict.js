@@ -1,14 +1,18 @@
-import { Button } from '@mui/material';
+import { Button, Switch, Typography, Stack } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { setAnnotStatus } from '../annotBar/annotBarSlice';
 import { sceneSelector } from '../sceneSelector/sceneSelectorSlice';
+import { preAnnotate } from '../annotBar/annotBarSlice';
 import { config } from '../../config';
 import axios from 'axios';
+import { useCallback } from 'react';
 
 const InteractivePredict = ({
     instPositiveClicks,
     instNegativeClicks,
-    currSetAnnotInstance
+    currSetAnnotInstance,
+    appIsScribble,
+    appSetIsScribble
 }) => {
     const currentScene = useSelector((state) => sceneSelector(state))
 
@@ -33,10 +37,21 @@ const InteractivePredict = ({
                 dispatch(setAnnotStatus('updated'))
             })
     }
+    const handleScribbleToggle = useCallback((e) => {
+        appSetIsScribble(!appIsScribble)
+    }, [appIsScribble, appSetIsScribble])
 
     return (
         <>
-            <Button variant='contained' onClick={(e) => handlePrediction(e)}>Predict</Button>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{marginLeft: "40%"}}>
+                <Button variant='contained' onClick={(e) => handlePrediction(e)}>Predict</Button>
+                <Button variant='contained' onClick={(e) => dispatch(preAnnotate(currentScene))} sx={{marginLeft: "5px"}}>Pre-Annotate</Button>
+                <Stack direction="row" spacing={1} alignItems="center">
+                    <Typography color="text.primary">Point</Typography>
+                    <Switch checked={appIsScribble === true} onChange={(e) => handleScribbleToggle(e)}/>
+                    <Typography color="text.primary">Scribble</Typography>
+                </Stack>
+            </Stack>
         </>
     )
 }
